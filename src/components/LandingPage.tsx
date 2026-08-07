@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Compass, Shield, ArrowRight, Smartphone, BookOpen, Clock, Mail, Phone, MapPin, Sparkles, LogIn, ChevronDown, Check, Globe, Menu, X } from 'lucide-react';
 import { Kitchen } from '../types';
@@ -15,6 +15,12 @@ interface LandingPageProps {
   setUserCoords: React.Dispatch<React.SetStateAction<{ lat: number; lng: number }>>;
 }
 
+const CONTACT_PLACEHOLDERS = [
+  "e.g. We possess a small traditional tea-shop near Kochi Metro and would love to register as a partner kitchen...",
+  "e.g. My tech startup would like to purchase 500 meal vouchers as part of our monthly CSR initiative...",
+  "e.g. I live near Aluva and can help verify eateries or manage weekend food distribution drives..."
+];
+
 export default function LandingPage({
   kitchens,
   onOpenLogin,
@@ -26,6 +32,15 @@ export default function LandingPage({
   const [mapLocked, setMapLocked] = useState(true);
   const [activeDetail, setActiveDetail] = useState<'donor' | 'kitchen' | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % CONTACT_PLACEHOLDERS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
   
   // Form state for custom Contact section
   const [contactName, setContactName] = useState('');
@@ -543,7 +558,7 @@ export default function LandingPage({
                             type="text"
                             value={contactName}
                             onChange={(e) => setContactName(e.target.value)}
-                            placeholder="e.g. Anand Sharma"
+                            placeholder="e.g. Neil John"
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-emerald-600 font-sans"
                           />
                         </div>
@@ -554,7 +569,7 @@ export default function LandingPage({
                             type="email"
                             value={contactEmail}
                             onChange={(e) => setContactEmail(e.target.value)}
-                            placeholder="e.g. anand@outlook.com"
+                            placeholder="e.g. neiljohn@email.com"
                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-emerald-600 font-sans"
                           />
                         </div>
@@ -562,21 +577,39 @@ export default function LandingPage({
 
                       <div>
                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Your Enquiry</label>
-                        <textarea
-                          required
-                          rows={4}
-                          value={contactMsg}
-                          onChange={(e) => setContactMsg(e.target.value)}
-                          placeholder="e.g. We possess a small traditional tea-shop near Kochi Metro and would love to register as a partner kitchen..."
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-emerald-600 font-sans"
-                        />
+                        <div className="relative">
+                          <textarea
+                            required
+                            rows={4}
+                            value={contactMsg}
+                            onChange={(e) => setContactMsg(e.target.value)}
+                            placeholder=""
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-emerald-600 font-sans relative z-10"
+                          />
+                          {!contactMsg && (
+                            <div className="absolute top-0 left-0 w-full h-full p-3.5 pointer-events-none overflow-hidden rounded-xl z-20">
+                              <AnimatePresence mode="wait">
+                                <motion.p
+                                  key={placeholderIndex}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                                  className="text-xs text-slate-400 font-sans m-0 leading-relaxed max-w-[95%] absolute left-3.5 top-2.5 right-3.5"
+                                >
+                                  {CONTACT_PLACEHOLDERS[placeholderIndex]}
+                                </motion.p>
+                              </AnimatePresence>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <button
                         type="submit"
                         className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white font-semibold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        Send Message to Counter
+                        Send Message
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </form>
